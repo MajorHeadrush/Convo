@@ -1,0 +1,261 @@
+'Convo 1.2
+login = 0
+DIM txt$(100)
+ON ERROR GOTO ErrorTrap
+CLS
+skiplogon = 1
+IF skiplogon = 1 THEN
+    user$ = "majorheadrush"
+    pass$ = "pheonix"
+    fname$ = "martin"
+    lname$ = "drummond"
+    GOTO SkipLogon
+END IF
+reenterpassword:
+LINE INPUT "Please Login (enter a valid user name or 0 to register: "; username$
+IF username$ = "0" THEN
+    LINE INPUT "Please enter your user name: "; newuser$
+    LINE INPUT "Please enter your password: "; newpassword$
+    PRINT "You are now registered"
+    PRINT "User Name: "; newuser$
+    PRINT "Password: "; newpassword$
+    OPEN "a", #1, "users.txt"
+    WRITE #1, newuser$, newpassword$
+    CLOSE #1
+END IF
+IF username$ <> "0" THEN
+    LINE INPUT "Please enter your password: "; password$
+    OPEN "i", #1, "users.txt"
+    WHILE NOT EOF(1)
+        INPUT #1, user$, pass$
+        PRINT "user$= "; user$; "*"; " username$= "; username$; "* "; "pass$ "; pass$; "*"; " password$= "; password$
+        LINE INPUT sdf$
+        IF UCASE$(user$) <> UCASE$(username$) OR pass$ <> password$ THEN
+            PRINT "Incorrect user name or password"
+            GOTO reenterpassword
+        END IF
+    WEND
+END IF
+
+SkipLogon:
+SHELL _DONTWAIT "notepad.exe text.txt"
+SHELL _DONTWAIT "C:\Windows\Speech\Common\sapisvr.exe -SpeechUX"
+'LINE INPUT "shelled to voice rec"; sdf$
+say$ = "Hi " + fname$ + " welcome to Convo 1.2"
+PRINT "Convo: "; say$
+GOSUB SayString
+
+AskQuestion:
+question$ = ""
+GOSUB WaitKey
+GOSUB GetText
+question$ = txt$
+say$ = question$
+'GOSUB SayString
+PRINT "Martin: "; say$
+LenQuestStr = LEN(question$)
+IF LenQuestStr < 1 THEN GOTO AskQuestion
+
+GOSUB QuestStrOptions
+
+'get the file name
+IF LenQuestStr = 1 THEN a = 1
+IF LenQuestStr = 2 THEN a = 2
+IF LenQuestStr > 30 THEN a = 2
+IF LenQuestStr > 2 AND LenQuestStr < 31 THEN a = 3
+Leftquestion$ = UCASE$(LEFT$(question$, a))
+Lenquestion$ = RIGHT$(STR$(LenQuestStr), LEN(STR$(LenQuestStr)) - 1)
+file$ = Leftquestion$ + Lenquestion$
+
+'Check if the file exists
+GetAnswer$ = "yes"
+OPEN "i", #1, file$
+GetAnswer$ = ""
+
+'Check For the Answer
+WHILE NOT EOF(1)
+    INPUT #1, ans$, resp$
+    IF UCASE$(ans$) = UCASE$(question$) THEN
+        PRINT "Convo: "; resp$
+        say$ = resp$
+        GOSUB SayString
+        CLOSE 1
+        GOTO AskQuestion
+    END IF
+WEND
+CLOSE 1
+GOSUB GetAnswer
+OPEN "a", #1, file$
+WRITE #1, question$, answer$
+CLOSE 1
+GOTO AskQuestion
+
+Pause:
+ti = 0
+ret1:
+ti = 0
+IF ti = pause THEN RETURN
+GOTO ret1
+
+SayString:
+CLOSE 1
+OPEN "o", #1, "espeakfile"
+WRITE #1, say$
+CLOSE 1
+SHELL _HIDE "espeak -f espeakfile"
+RETURN
+
+GetText:
+x = 1
+txt$ = ""
+OPEN "i", #2, "Text.txt"
+WHILE NOT EOF(2)
+    INPUT #2, txt$(x)
+    txt$ = txt$ + txt$(x)
+    'LOCATE 15, 1
+    'PRINT "x="; x; "*"; "txt$(x)="; txt$(x)
+    'LINE INPUT sdf$
+    x = x + 1
+WEND
+CLOSE 2
+'PRINT "txt$= "; txt$; "*"
+'PRINT "done"
+'LINE INPUT sdf$
+RETURN
+
+WaitKey:
+'say$ = "After you are finished speaking and saving your text to the Text.txt file press any key"
+'PRINT say$
+'GOSUB SayString
+KeyIn:
+k$ = INKEY$
+'LOCATE 15, 1
+'PRINT "k$="; k$; "*" ';"txt$(x)="; txt$(x)
+IF k$ <> "" THEN RETURN
+GOTO KeyIn
+
+'say$ = "Please Login"
+'PRINT "Convo: "; say$
+'GOSUB SayString
+
+GetAnswer:
+say$ = "I'm sorry but I don't have a response to that. Please enter one."
+PRINT "Convo: I'm sorry but I don't have a response to that. Please enter one."
+GOSUB SayString
+'LINE INPUT "Response: "; answer$
+answer$ = ""
+GOSUB WaitKey
+GOSUB GetText
+answer$ = txt$
+say$ = answer$
+'GOSUB SayString
+say$ = "Thank you."
+PRINT "Convo: "; say$
+GOSUB SayString
+RETURN
+
+IDontLikeThatResponse:
+say$ = "What would you like my response to be?"
+PRINT say$
+GOSUB SayString
+LINE INPUT "Response: "; newanswer$
+say$ = newanswer$
+GOSUB SayString
+say$ = "Thank you."
+PRINT "Convo: "; say$
+GOSUB SayString
+RETURN
+
+QuestStrOptions:
+'PRINT "UCASE$(question$) = "; UCASE$(question$)
+'LINE INPUT "entering Options"; sdf$
+
+IF UCASE$(question$) = "I DONT LIKE THAT RESPONSE" OR UCASE$(question$) = "I DON'T LIKE THAT RESPONSE" THEN GOSUB IDontLikeThatResponse
+IF UCASE$(question$) = "MY NAME IS" OR UCASE$(question$) = "IM" OR UCASE$(question$) = "I'M" OR UCASE$(question$) = "I AM" THEN
+    'PRINT "question$ = "; question$; "* name$ = "; name$; "* pswd$ = "; pswd$; "* directory$ = "; directory$
+    'LINE INPUT "entering Login"; sdf$
+    'GOSUB Login
+    PRINT "question$ = "; question$; "* name$ = "; name$; "* pswd = "; pswd; "* directory$ = "; directory$; "* login = "; login
+    LINE INPUT "exitting Login"; sdf$
+END IF
+IF UCASE$(question$) = "GOOD BYE." OR UCASE$(question$) = "GOOD BYE" OR UCASE$(question$) = "BYE." OR UCASE$(question$) = "BYE" OR UCASE$(question$) = "QUIT." OR UCASE$(question$) = "QUIT" OR UCASE$(question$) = "END." OR UCASE$(question$) = "END" OR UCASE$(question$) = "STOP." OR UCASE$(question$) = "STOP" THEN
+    say$ = "Thanks for using Convo 1.2"
+    PRINT "Convo: "; say$
+    GOSUB SayString
+    END
+END IF
+'PRINT "UCASE$(question$) = "; UCASE$(question$)
+'LINE INPUT "exitting Options"; sdf$
+RETURN
+
+
+
+
+
+
+CheckIfDirectoryExists$ = "yes"
+CHDIR CurrentDirectory$
+CheckIfDirectoryExists:
+CheckIfDirectoryExists$ = ""
+RETURN
+
+ErrorTrap:
+'LOCATE 15, 1
+'PRINT "you have entered ErrorTrap                  "
+'LINE INPUT sdf$
+IF GetAnswer$ = "yes" THEN
+    GOSUB GetAnswer
+    OPEN "o", #1, file$
+    WRITE #1, question$, answer$
+    CLOSE 1
+    GetAnswer$ = ""
+    'LOCATE 15, 1
+    'PRINT "exitting ErrorTrap                            "
+    'LINE INPUT sdf$
+
+    RESUME AskQuestion
+END IF
+IF CheckIfDirectoryExists$ = "yes" THEN
+    MKDIR CurrentDirectory$
+    CHDIR CurrentDirectory$
+    'LOCATE 15, 1
+    'PRINT "exitting ErrorTrap                            "
+    'LINE INPUT sdf$
+
+    RETURN CheckIfDirectoryExists
+END IF
+'LOCATE 15, 1
+PRINT "what are you doing here? exitting ErrorTrap                            "
+LINE INPUT sdf$
+
+'cut code
+
+
+
+'LOCATE 15, 1
+'PRINT "file$ ="; file$; "*Leftquestion$ ="; Leftquestion$; "*Lenquestion$ ="; Lenquestion$; "*"
+'LINE INPUT sdf$
+
+'LINE INPUT "User: "; question$
+
+LOCATE 10, 1
+PRINT "ERR="; ERR
+PRINT "file$="; file$; "***"
+PRINT "fileexists ="; fileexists; "*answer ="; answer; "***"
+PRINT "file$="; file$; "*answer$="; answer$; "***"
+PRINT "file$="; file$; "***"
+LINE INPUT sdf$
+LOCATE 10, 1
+PRINT "fileexists ="; fileexists; "*answer ="; answer; "***"
+PRINT "file$="; file$; "*answer$="; answer$; "***"
+PRINT "file$="; file$; "***"
+LINE INPUT sdf$
+'LOCATE 15, 1
+'PRINT "file$="; file$; "***"
+'PRINT "question$="; question$; "***"
+'PRINT "Leftquestion$="; Leftquestion$; "***"
+'PRINT "Lenquestion$="; Lenquestion$; "***"
+'LINE INPUT sdf$
+
+fileexists = 0
+answer = 0
