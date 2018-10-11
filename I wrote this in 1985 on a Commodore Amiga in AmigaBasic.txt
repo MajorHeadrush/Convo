@@ -1,0 +1,20 @@
+I wrote this in 1985 on a Commodore Amiga in AmigaBasic. Since then i have rewritten it several times the last time in QB64. Unfortunately PCs didnt come with voice synthesis so i have had to incorporate it 3rd party. Recently i added voice recognition by clumsily using microsofts voice recognition. I actually write it to a .txt and save it then press a key telling convo to look in the file... this is not the way i want it to work... i want to simply talk and respond talk and respond maybe after you dont say anything after a few seconds.... the ai part is simply that if it doesnt find an exact match for your input then it will ask you for a good response... you give it the response and next time it matches the input it will give that response
+
+I have been working on making it recognize people simply through a kind of logon process of some kind that has seperate data bases for each user and falls back to the default directory for a response if it doesnt have one in the users directory.... and making the program so that you can change a response if you dont like the one it gives you... the idea is to get enough people using it that it builds a huge data base so almost any statement is responded to... as a writer of data bases i quickly realized i wanted to convert the speech to text and text to speech to keep the data base size down... 
+
+ive thought of many uses for this program as a translator or even having the statements trigger actual actions like using your computer or turning off the lights or just about anything really... i know github will know how to make the c# or other calls to the OS to make the voice recog and probably synth run seemlessly in windows... i will apreciate the help and so will users thank you in advance.... live long and prosper lol
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
